@@ -29,7 +29,7 @@ Set the working directory to the image folder. Specify the training and the test
 
 ```{r wkdir, eval=FALSE}
 set.seed(2018)
-setwd("./ads_fall2018_proj3") 
+setwd("/Users/zhongming/Documents/GitHub/Spring2019-Proj3-spring2019-proj3-grp7/") 
 # here replace it with your own path or manually set it in RStudio to where this rmd file is located. 
 # use relative path for reproducibility
 ```
