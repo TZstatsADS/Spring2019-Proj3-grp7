@@ -5,6 +5,8 @@
 
 ### Project 3
 
+### GBM
+
 superResolution <- function(LR_dir, HR_dir, modelList){
   
   ### Construct high-resolution images from low-resolution images with trained predictor
