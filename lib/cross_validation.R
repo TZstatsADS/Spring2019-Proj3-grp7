@@ -23,6 +23,9 @@ cv.function <- function(X.train, y.train, d, K){
     pred <- test(fit, test.data)  
     cv.error[i] <- mean((pred - test.label)^2)  
     
+    # on my way
+    print(i)
+    
   }			
   return(c(mean(cv.error),sd(cv.error)))
 }

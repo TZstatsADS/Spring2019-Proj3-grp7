@@ -29,17 +29,17 @@ Set the working directory to the image folder. Specify the training and the test
 
 ```{r wkdir, eval=FALSE}
 set.seed(2018)
-setwd("/Users/zhongming/Documents/GitHub/Spring2019-Proj3-spring2019-proj3-grp7/") 
+setwd("../doc") 
 # here replace it with your own path or manually set it in RStudio to where this rmd file is located. 
 # use relative path for reproducibility
 ```
 
 Provide directories for training images. Low-resolution (LR) image set and High-resolution (HR) image set will be in different subfolders. 
 ```{r}
-train_dir <- "../data/train_set/" # This will be modified for different data sets.
+train_dir <- "../data/train_set1/" # This will be modified for different data sets.
 train_LR_dir <- paste(train_dir, "LR/", sep="")
 train_HR_dir <- paste(train_dir, "HR/", sep="")
-train_label_path <- paste(train_dir, "label.csv", sep="") 
+#train_label_path <- paste(train_dir, "label.csv", sep="") 
 ```
 
 ### Step 1: set up controls for evaluation experiments.
@@ -63,7 +63,7 @@ run.feature.test=TRUE # process features for test set
 Using cross-validation or independent test set evaluation, we compare the performance of models with different specifications. In this example, we use GBM with different `depth`. In the following chunk, we list, in a vector, setups (in this case, `depth`) corresponding to models that we will compare. In your project, you might compare very different classifiers. You can assign them numerical IDs and labels specific to your project. 
 
 ```{r model_setup}
-model_values <- seq(3, 11, 2)
+model_values <- seq(1,2)
 model_labels = paste("GBM with depth =", model_values)
 ```
 
@@ -72,7 +72,7 @@ model_labels = paste("GBM with depth =", model_values)
 We provide extra information of image label: car (0), flower (1), market (2). These labels are not necessary for your model.
 
 ```{r train_label}
-extra_label <- read.csv(train_label_path, colClasses=c("NULL", NA, NA))
+#extra_label <- read.csv(train_label_path, colClasses=c("NULL", NA, NA))
 ```
 
 ### Step 3: construct features and responses
@@ -93,7 +93,7 @@ if(run.feature.train){
   label_train <- dat_train$label
 }
 
-#save(dat_train, file="./output/feature_train.RData")
+save(dat_train, file="../output/feature_train.RData")
 ```
 
 
@@ -126,6 +126,7 @@ if(run.cv){
   }
   save(err_cv, file="../output/err_cv.RData")
 }
+err_cv
 ```
 
 Visualize cross-validation results. 
@@ -168,13 +169,13 @@ Feed the final training model with the completely holdout testing data.
   + Output: construct high-resolution versions for each low-resolution test image.
 ```{r superresolution}
 source("../lib/superResolution.R")
-test_dir <- "../data/test_set/" # This will be modified for different data sets.
+test_dir <- "../data/test_set1/" # This will be modified for different data sets.
 test_LR_dir <- paste(test_dir, "LR/", sep="")
 test_HR_dir <- paste(test_dir, "HR/", sep="")
 
 tm_test=NA
 if(run.test){
-  load(file="../output/fit_train.RData")
+  #load(file="../output/fit_train.RData")
   tm_test <- system.time(superResolution(test_LR_dir, test_HR_dir, fit_train))
 }
 ```
