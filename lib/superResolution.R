@@ -2,8 +2,10 @@
 ### Super-resolution ###
 ########################
 
-### Author: Chengliang Tang
+
 ### Project 3
+
+### GBM
 
 superResolution <- function(LR_dir, HR_dir, modelList){
   
@@ -15,76 +17,139 @@ superResolution <- function(LR_dir, HR_dir, modelList){
   ### load libraries
   library("EBImage")
   n_files <- length(list.files(LR_dir))
-  
-  
+  PSNR <- NULL
   ### read LR/HR image pairs
   for(i in 1:n_files){
     imgLR <- readImage(paste0(LR_dir,  "img", "_", sprintf("%04d", i), ".jpg"))
-    pathHR <- paste0(HR_dir,  "img", "_", sprintf("%04d", i), ".jpg")
-    featMat <- array(NA, c(dim(imgLR)[1] * dim(imgLR)[2], 8, 3))
+    imgHR <- readImage(paste0(HR_dir,  "img", "_", sprintf("%04d", i), ".jpg"))
+    LR_nrow <- nrow(imgLR)
+    LR_ncol <- ncol(imgLR)
+    pixel <- LR_nrow * LR_ncol
+    featMat <- array(NA, c(pixel, 8, 3))
     
     ### step 1. for each pixel and each channel in imgLR:
     ###           save (the neighbor 8 pixels - central pixel) in featMat
     ###           tips: padding zeros for boundary points
+    r <- (1 : pixel - 1) %% LR_nrow + 1
+    c <- (1 : pixel - 1) %/% LR_nrow + 1
     
-    n_row <- dim(imgLR)[1]
-    n_col <- dim(imgLR)[2]
-    imgLR_padding <- array(0, dim(imgLR) + c(2,2,0))
-    imgLR_padding[1:n_row + 1, 1:n_col + 1, ] <- imgLR
-    
-    n_row_padding <- n_row + 2
-    n_col_padding <- n_col + 2
-    ind_row_padding <- c(rep(1, n_col_padding), rep(2:(n_row_padding-1), each=2), rep(n_row_padding, n_col_padding))
-    ind_col_padding <- c(1:n_col_padding, rep(c(1, n_col_padding), n_row), 1:n_col_padding)
-    ind_padding <- ind_row_padding + (ind_col_padding - 1) * n_row_padding
-    
-    ind_all <- 1:(n_row_padding * n_col_padding)
-    ind_origin <- setdiff(ind_all, ind_padding)
-    
-    n_points <- n_row * n_col
-    
-    for(channel in 1:3){
-      samp_ind <- ind_origin
+    for (k in c(1:3)) {
+      # supplementary image matrix
+      supp_imgLR <- cbind(imgLR[, 1, k], imgLR[, , k], imgLR[, LR_ncol, k])
+      supp_imgLR <- rbind(cbind(imgLR[1, 1, k], imgLR[1, , k],imgLR[1, LR_ncol, k]), 
+                          supp_imgLR, cbind(imgLR[LR_nrow, 1, k], imgLR[LR_nrow, , k],
+                                            imgLR[LR_nrow, LR_ncol, k]))
+      center=supp_imgLR[cbind(r+1, c+1)]
       
-      ## X3  X2  x1
-      ## x4  ct  x8
-      ## x5  x6  x7
-      x1_ind <- samp_ind - 1 + n_row_padding
-      x2_ind <- samp_ind - 1
-      x3_ind <- samp_ind - 1 - n_row_padding
-      x4_ind <- samp_ind - n_row_padding
-      x5_ind <- samp_ind + 1 - n_row_padding
-      x6_ind <- samp_ind + 1
-      x7_ind <- samp_ind + 1 + n_row_padding
-      x8_ind <- samp_ind + n_row_padding
-      samplesLR <- imgLR_padding[,, channel][c(samp_ind, x1_ind, x2_ind, x3_ind, x4_ind, x5_ind, x6_ind, x7_ind, x8_ind)]
-      samplesLR.mat <- matrix(samplesLR, nrow=n_points)
-      X <- samplesLR.mat[,-1] - samplesLR.mat[,1]
+      ### fill the featM 
+      featMat[,  1, k] <- supp_imgLR[cbind(r,c)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r,c + 1)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r,c + 2)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 1,c)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 1,c + 2)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 2,c)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 2,c + 1)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 2,c + 2)] - center
+    }
+    ### step 2. apply the modelList over featMat
+    predMat <- test(modelList, featMat)
+    ### step 3. recover high-resolution from predMat and save in HR_dir
+    
+    predMat[, , 1] <- predMat[, , 1] + imgLR[, ,1][cbind(r,c)]
+    predMat[, , 2] <- predMat[, , 2] + imgLR[, ,2][cbind(r,c)]
+    predMat[, , 3] <- predMat[, , 3] + imgLR[, ,3][cbind(r,c)]
+    
+    imgHR_fit <- array(0, c(LR_nrow*2, LR_ncol*2, 3))
+    imgHR_fit <- Image(imgHR_fit, colormode = Color)
+    
+    base_row <- seq(1, 2 * LR_nrow, 2)
+    base_col <- seq(1, 2 * LR_ncol, 2)
+    imgHR_fit[base_row, base_col, ] <- predMat[, 1, ]
+    imgHR_fit[base_row, base_col + 1, ] <- predMat[, 2, ]
+    imgHR_fit[base_row + 1, base_col, ] <- predMat[, 3, ]
+    imgHR_fit[base_row + 1, base_col + 1, ] <- predMat[, 4, ]
+    # calculate MSE and PSNR
+    mse <- sum((imgHR - imgHR_fit)^2)/(3*pixel)
+    psnr <- 20*log10(range(imgHR)[2]) - 10*log10(mse)
+    PSNR <- append(PSNR, psnr)
+    #setwd(save_path)
+    writeImage(imgHR_fit, paste0("../data/test_set/SR/","img_gbm_fit_", sprintf("%04d", i), ".jpeg"))
+  }
+  PSNR <- sum(PSNR)/n_files
+  return(PSNR)
+}
+
+
+
+### XGB
+
+superResolution_xgboost <- function(LR_dir,HR_dir, modelList){
+  
+  ### Construct high-resolution images from low-resolution images with trained predictor
+  
+  ### Input: a path for low-resolution images + a path for high-resolution images 
+  ###        + a list for predictors
+  ### load libraries
+  library("EBImage")
+  n_files <- length(list.files(LR_dir))
+  PSNR <- NULL
+  ### read LR/HR image pairs
+  for(i in 1:n_files){
+    imgLR <- readImage(paste0(LR_dir,  "img", "_", sprintf("%04d", i), ".jpg"))
+    imgHR <- readImage(paste0(HR_dir,  "img", "_", sprintf("%04d", i), ".jpg"))
+    #pathHR <- paste0(HR_dir,  "img", "_", sprintf("%04d", i), ".jpg")
+    LR_nrow <- nrow(imgLR)
+    LR_ncol <- ncol(imgLR)
+    pixel <- LR_nrow * LR_ncol
+    featMat <- array(NA, c(pixel, 8, 3))
+    ### step 1. for each pixel and each channel in imgLR:
+    ###           save (the neighbor 8 pixels - central pixel) in featMat
+    ###           tips: padding zeros for boundary points
+    r <- (1 : pixel - 1) %% LR_nrow + 1
+    c <- (1 : pixel - 1) %/% LR_nrow + 1
+    
+    for (k in c(1:3)) {
+      # supplementary image matrix
+      supp_imgLR <- cbind(imgLR[, 1, k], imgLR[, , k], imgLR[, LR_ncol, k])
+      supp_imgLR <- rbind(cbind(imgLR[1, 1, k], imgLR[1, , k],imgLR[1, LR_ncol, k]), 
+                          supp_imgLR, cbind(imgLR[LR_nrow, 1, k], imgLR[LR_nrow, , k],imgLR[LR_nrow, LR_ncol, k]))
+      center=supp_imgLR[cbind(r+1, c+1)]
       
-      featMat[, , channel] <- X
+      ### fill the featM 
+      featMat[,  1, k] <- supp_imgLR[cbind(r,c)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r,c + 1)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r,c + 2)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 1,c)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 1,c + 2)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 2,c)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 2,c + 1)] - center
+      featMat[,  1, k] <- supp_imgLR[cbind(r + 2,c + 2)] - center
     }
     
     ### step 2. apply the modelList over featMat
     predMat <- test(modelList, featMat)
+    
     ### step 3. recover high-resolution from predMat and save in HR_dir
-    predMat_array <- array(predMat, c(n_col*n_row, 4, 3))
-    LRcenter <- array(imgLR, c(n_col*n_row, 1, 3))
-
-    imgHR_recov <- array(NA, c(2*n_row, 2*n_col, 3))
+    predMat[, , 1] <- predMat[, , 1] + imgLR[, ,1][cbind(r,c)]
+    predMat[, , 2] <- predMat[, , 2] + imgLR[, ,2][cbind(r,c)]
+    predMat[, , 3] <- predMat[, , 3] + imgLR[, ,3][cbind(r,c)]
     
-  
-    for(channel in 1:3){
-      y23 <- as.vector(t(predMat_array[, c(2,3),channel] + LRcenter[,,channel]))
-      y14 <- as.vector(t(predMat_array[, c(1,4),channel] + LRcenter[,,channel]))
-      
-      imgHR_recov[, seq(1, 2*n_col-1, by=2), channel] <- y23
-      imgHR_recov[, seq(2, 2*n_col, by=2), channel] <- y14
-    }
+    imgHR_fit <- array(0, c(LR_nrow*2, LR_ncol*2, 3))
+    imgHR_fit <- Image(imgHR_fit, colormode = Color)
     
-    imgHR_recov <- Image(imgHR_recov, colormode="Color")
-    writeImage(imgHR_recov, paste0(HR_dir,  "img", "_", sprintf("%04d", i), ".jpg"))
-    
-    
-    
+    base_row <- seq(1, 2 * LR_nrow, 2)
+    base_col <- seq(1, 2 * LR_ncol, 2)
+    imgHR_fit[base_row, base_col, ] <- predMat[, 1, ]
+    imgHR_fit[base_row, base_col + 1, ] <- predMat[, 2, ]
+    imgHR_fit[base_row + 1, base_col, ] <- predMat[, 3, ]
+    imgHR_fit[base_row + 1, base_col + 1, ] <- predMat[, 4, ]
+    #calculate MSE and PSNR
+    mse <- sum((imgHR - imgHR_fit)^2)/(3*pixel)
+    psnr <- 20*log10(1) - 10*log10(mse)
+    PSNR <- append(PSNR, psnr)
+    #setwd(save_path)
+    writeImage(imgHR_fit, paste0("../data/test_set/SR/","img_xgboost_fit_", sprintf("%04d", i), ".jpeg"))
   }
+  PSNR <- sum(PSNR)/n_files
+  return(PSNR)
 }
