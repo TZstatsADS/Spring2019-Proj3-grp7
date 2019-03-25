@@ -134,7 +134,6 @@ source("../lib/test.R")
 
 ```{r runcv, message=FALSE, warning=FALSE}
 library(parallel)
-
 source("../lib/cross_validation.R")
 
 no_cores <- detectCores()-1
