@@ -6,7 +6,8 @@
 Term: Spring 2019
 
 + Team 7
-	+ 1. Liu, Siwei sl4224@columbia.edu
+
+	+1. Liu, Siwei sl4224@columbia.edu
 
 	+2. Shen, Yu ys3167@columbia.edu
 
