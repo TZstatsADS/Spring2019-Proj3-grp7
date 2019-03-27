@@ -22,8 +22,8 @@ Term: Spring 2019
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) 
 
-+Zhong, Ming(major): Ming is responsible to run the baseline model and modify any codes realted to baseline mode. Ming is also responsible to organize codes and make final submission of the whole project. 
-
++Zhong, Ming(major): Ming is responsible to run the baseline model and modify any codes related to baseline mode. Ming is also responsible to organize codes and make final submission of the whole project. 
++Wang, Xinzhu(major): Xinzhu is responsible to run the XGboost model and modify any codes related to XGboost modal. Xiznhu also assisted Shen to debug the super resolution part.  
 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
