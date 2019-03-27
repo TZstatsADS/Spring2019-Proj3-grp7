@@ -28,7 +28,7 @@ The source code of the baseline model is in [this folder](doc/main_baseline.Rmd)
 
 +Wang, Xinzhu(major): Xinzhu is responsible to run the XGboost model and modify any codes related to XGboost model. Xiznhu also assisted Shen to debug the super resolution part.  
 
-+Liu, Siwei(Average Participation): Siwei partook the feature improvement part. She formed the discussion group and participated throughout the project discussion.
++Liu, Siwei(Average Participation): Siwei partook the feature improvement part. She formed the discussion group and participated throughout the project discussion. Siwei also wrapped up the project summary in the readme file.
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
