@@ -22,7 +22,7 @@ Term: Spring 2019
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) 
 
-+Zhong, Ming(major): Ming is responsible to run the baseline model and modified any codes realted to baseline mode. Ming is also responsible to organize codes and make final submission of the whole project. 
++Zhong, Ming(major): Ming is responsible to run the baseline model and modify any codes realted to baseline mode. Ming is also responsible to organize codes and make final submission of the whole project. 
 
 
 
