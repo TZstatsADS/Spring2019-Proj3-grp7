@@ -7,15 +7,15 @@ Term: Spring 2019
 
 + Team 7
 
-	+1. Liu, Siwei sl4224@columbia.edu
+	1. Liu, Siwei sl4224@columbia.edu
 
-	+2. Shen, Yu ys3167@columbia.edu
+	2. Shen, Yu ys3167@columbia.edu
 
-	+3. Shu, Jason jls2319@columbia.edu
+	3. Shu, Jason jls2319@columbia.edu
 
-	+4. Wang, Xinzhu xw2581@columbia.edu
+	4. Wang, Xinzhu xw2581@columbia.edu
 
-	+5. Zhong, Ming mz2692@columbia.edu
+	5. Zhong, Ming mz2692@columbia.edu
 
 
 + Project summary: In this project, we created a classification engine for enhance the resolution of images. The baseline model is a GBM model, and we attempted to use XGboost in order to enhance the images faster. 
