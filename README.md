@@ -5,17 +5,24 @@
 
 Term: Spring 2019
 
-+ Team ##
-+ Team members
-	+ team member 1
-	+ team member 2
-	+ team member 3
-	+ team member 4
-	+ team member 5
++ Team 7
 
-+ Project summary: In this project, we created a classification engine for enhance the resolution of images. 
+	+ Liu, Siwei sl4224@columbia.edu
+
+	+ Shen, Yu ys3167@columbia.edu
+
+	+ Shu, Jason jls2319@columbia.edu
+
+	+ Wang, Xinzhu xw2581@columbia.edu
+
+	+ Zhong, Ming mz2692@columbia.edu
+
+
++ Project summary: In this project, we created a classification engine for enhance the resolution of images. The baseline model is a GBM model, and we attempted to use XGboost in order to enhance the images faster. 
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
+
+
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
