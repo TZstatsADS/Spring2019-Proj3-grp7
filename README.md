@@ -1,6 +1,9 @@
 # Project: Can you unscramble a blurry image? 
 ![image](figs/example.png)
 
+Presentation:
+https://docs.google.com/presentation/d/1dx_MmqgSDzAdfgI9HhStIsqXwA7VUTVcO4PJkZ7u_6M/edit?usp=sharing
+
 ### [Full Project Description](doc/project3_desc.md)
 
 Term: Spring 2019
