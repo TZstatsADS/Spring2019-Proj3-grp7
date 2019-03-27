@@ -1,8 +1,6 @@
 ---
 title: "Main_xgb"
-output:
-  html_document: default
-  pdf_document: default
+output: html_document
 ---
 
 In your final repo, there should be an R markdown file that organizes **all computational steps** for evaluating your proposed image classification framework. 
@@ -31,14 +29,14 @@ Set the working directory to the image folder. Specify the training and the test
 
 ```{r wkdir, eval=FALSE}
 set.seed(2018)
-setwd("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/doc/") 
+setwd("~/Desktop/Spring2019-Proj3-spring2019-proj3-grp7-master") 
 # here replace it with your own path or manually set it in RStudio to where this rmd file is located. 
 # use relative path for reproducibility
 ```
 
 Provide directories for training images. Low-resolution (LR) image set and High-resolution (HR) image set will be in different subfolders. 
 ```{r}
-train_dir <- "/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/data/train_set/" # This will be modified for different data sets.
+train_dir <- "../data/train_set/" # This will be modified for different data sets.
 train_LR_dir <- paste(train_dir, "LR/", sep="")
 train_HR_dir <- paste(train_dir, "HR/", sep="")
 train_label_path <- paste(train_dir, "label.csv", sep="") 
@@ -89,16 +87,16 @@ extra_label <- read.csv(train_label_path, colClasses=c("NULL", NA, NA))
 
 
 ```{r feature}
-source("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/lib/feature.R")
+source("../lib/feature_xgb.R")
 
 tm_feature_train <- NA
 if(run.feature.train){
   tm_feature_train <- system.time(dat_train <- feature(train_LR_dir, train_HR_dir))
   feat_train <- dat_train$feature
   label_train <- dat_train$label
-}z
+}
 
-save(dat_train, file="/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/output/feature_train.RData")
+#save(dat_train, file="./output/feature_train.RData")
 ```
 
 
@@ -114,15 +112,15 @@ Call the train model and test model from library.
   + Input: an R object that contains a trained classifier.
   + Output: an R object of response predictions on the test set. If there are multiple classifiers under evaluation, there should be multiple sets of label predictions. 
 ```{r loadlib}
-source("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/lib/train_xgb.R")
-source("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/lib/test_xgb.R")
+source("../lib/train_xgb.R")
+source("../lib/test_xgb.R")
 ```
 
 #### Model selection with cross-validation
 * Do model selection by choosing among different values of training model parameters, that is, the interaction depth for GBM in this example. 
 
 ```{r runcv, message=FALSE, warning=FALSE}
-source("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/lib/cross_validation.R")
+source("../lib/cross_validation.R")
 
 if(run.cv){
   err_cv <- array(dim=c(length(model_values), 2))
@@ -130,14 +128,14 @@ if(run.cv){
     cat("k=", k, "\n")
     err_cv[k,] <- cv.function(feat_train, label_train, model_values[k], K)
   }
-  save(err_cv, file="/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/output/err_cv.RData")
+  save(err_cv, file="../output/err_cv.RData")
 }
 ```
 
 Visualize cross-validation results. 
 ```{r cv_vis}
 if(run.cv){
-  load("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/output/err_cv.RData")
+  load("../output/err_cv.RData")
   plot(model_values, err_cv[,1], xlab="Interaction Depth", ylab="CV Error",
        main="Cross Validation Error", type="n", ylim=c(0, 0.25))
   points(model_values, err_cv[,1], col="blue", pch=16)
@@ -162,7 +160,7 @@ par_best <- list(depth=model_best)
 ```{r final_train}
 tm_train=NA
 tm_train <- system.time(fit_train <- train(feat_train, label_train, par_best))
-save(fit_train, file="/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/output/fit_train.RData")
+save(fit_train, file="../output/fit_train.RData")
 ```
 
 ### Step 5: Super-resolution for test images
@@ -173,28 +171,25 @@ Feed the final training model with the completely holdout testing data.
   + Input: an R object that contains tuned predictors.
   + Output: construct high-resolution versions for each low-resolution test image.
 ```{r superresolution}
-source("/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/lib/superResolution.R")
-test_dir <- "/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/data/test_set/" # This will be modified for different data sets.
+source("../lib/superResolution.R")
+test_dir <- "../data/test_set/" # This will be modified for different data sets.
 test_LR_dir <- paste(test_dir, "LR/", sep="")
 test_HR_dir <- paste(test_dir, "HR/", sep="")
 
 tm_test=NA
 if(run.test){
-  load(file="/Users/apple/Documents/GitHub/Proj3/Spring2019-Proj3-spring2019-proj3-grp7/output/fit_train.RData")
-  tm_test <- system.time(superResolution_xgboost(test_LR_dir, test_HR_dir, fit_train))
-  PSNR <- superResolution_xgboost(test_LR_dir, test_HR_dir, fit_train)
+  load(file="../output/fit_train.RData")
+  tm_test <- system.time(superResolution(test_LR_dir, test_HR_dir, fit_train))
 }
-
 ```
 
 ### Summarize Running Time
 Prediction performance matters, so does the running times for constructing features and for training the model, especially when the computation resource is limited. 
 ```{r running_time}
 cat("Time for constructing training features=", tm_feature_train[1], "s \n")
-#cat("Time for constructing testing features=", tm_feature_test[1], "s \n")
+cat("Time for constructing testing features=", tm_feature_test[1], "s \n")
 cat("Time for training model=", tm_train[1], "s \n")
 cat("Time for super-resolution=", tm_test[1], "s \n")
-cat("PSNR =", PSNR)
 ```
 
 
