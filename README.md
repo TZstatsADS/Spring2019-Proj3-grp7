@@ -29,7 +29,7 @@ The source code of the baseline model is in [this folder](doc/main_baseline.Rmd)
 
 +Zhong, Ming(major): Ming is responsible to run the baseline model and modify any codes related to baseline mode. Ming is also responsible to organize codes and make final submission of the whole project. Besides, Ming deloped the whole project using Rstudio in Google Cloud Platform.
 
-+Wang, Xinzhu(major): Xinzhu is responsible to run the XGboost model and modify any codes related to XGboost model. Xiznhu also assisted Shen to debug the super resolution part. 
++Wang, Xinzhu(major): Xinzhu is responsible to run the XGboost model and modify any codes related to XGboost model. Xiznhu also assisted Shen to debug the super resolution part and ran the whole project using Rstudio on Google Cloud Platform. 
 
 +Shen, Yu(major): Yu is responsible to finish the superResolution part and modify the codes related to this part. Yu also help with running the XGboost model and get the final result of this part.
 
